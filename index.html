@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+  <link rel="stylesheet" href="./style.css" />
+  <script>
+    window.document.addEventListener("DOMContentLoaded", function () 
+    {
+      let nameTyper = document.getElementById("name");
+      let descTyper = document.getElementById("description");
+      let addPostbtn = document.getElementById("send");
+      let tableContainer = document.querySelector(".table");
+      console.log(descTyper);
+      const postData = async (
+        url = "",
+        data =
+          {
+            name: "Test",
+            description: "Test",
+          }
+      ) => {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+        return response.json();
+      };
+      const addRow = () => {
+        tableContainer.innerHTML = "";
+        fetch("http://posts.back/get-posts.php")
+          .then((response) => response.json())
+          .then((data) => {
+            data.forEach((item) => {
+              const newRow = `
+            <div class="row">   
+              <div class="id">
+                <p>${item.id}</p>
+              </div>
+              <div class="name">
+                <p>${item.name}</p>
+              </div>
+              <div class="decs">
+                <p>${item.description}</p>
+              </div>
+              <button class="delete" data-id="${item.id}">Delete</button>
+              <button class="redact" data-id="${item.id}">Redact</button>
+            </div>
+          `;
+            tableContainer.innerHTML += newRow;
+            });
+            let reButton = document.querySelectorAll(".redact"); 
+            let delBtn = document.querySelectorAll(".delete");
+            delBtn.forEach(button => {
+              button.addEventListener("click", () => {
+                let id = button.getAttribute("data-id")
+                fetch(`http://posts.back/delete-post.php?id=${id}`, {
+                  method: "DELETE",
+                })
+                  .then((response) => response.json())
+                  .then((data) => {
+                    console.log(data);
+                    addRow();
+                  });
+              });
+                
+            });
+            
+            reButton.forEach(button => 
+            { 
+              const newName = nameTyper.value; 
+              const newDesc = descTyper.value; 
+              let id = button.getAttribute("data-id")
+              button.addEventListener('click' , () =>  
+              { 
+                fetch(`http://posts.back/edit-post.php?id=${id}` , 
+                { 
+                  method:"PUT", 
+                  body: JSON.stringify( 
+                    { 
+                      name:newName, 
+                      description:newDesc 
+                    }
+                  ), 
+                  headers:
+                  { 
+                    "Content-type" : "application/json"
+                  }
+                  
+                })
+                .then((response) => 
+                { 
+                  return response.json();
+                })
+                .then((data) => 
+                { 
+                  console.log(data)
+                  if(data) 
+                  { 
+                    addRow()
+                  }
+                }) 
+              })
+            })
+          });
+      };
+      addRow();
+
+
+
+      addPostbtn.addEventListener("click", () => {
+        const nameValue = nameTyper.value;
+        const descValue = descTyper.value;
+        postData("http://posts.back/add-post.php", {
+          name: nameValue,
+          description: descValue,
+        })
+          .then((data) => {
+            if (data) {
+              addRow();
+            }
+          });
+      });
+      
+    });
+  </script>
+</head>
+
+<body>
+  <div class="post-send">
+    <input type="text" id="name" />
+    <input type="text" id="description" />
+    <!-- <input id="send" type="submit"> -->
+    <button id="send">as</button>
+  </div>
+
+  <div class="table"></div>
+
+  <div class="reg">
+    <p>Имя</p>
+    <input type="text" id="log" />
+    <p>Введите пароль</p>
+    <input type="password" id="password" />
+    <p>Введите логин</p>
+    <input type="text" id="login" />
+    <button class="btn" id="btn">Done</button>
+  </div>
+</body>
+
+</html>

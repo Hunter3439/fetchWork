@@ -1,0 +1,13 @@
+.row 
+{   
+    width: 40%;
+    border: 1px solid gray ;
+    display: flex;
+    flex-direction: row;
+}
+.row div
+{   
+    width: 33.3333%;
+    padding: 20px ;
+    border: 1px solid gray ;
+}
